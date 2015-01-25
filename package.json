@@ -1,0 +1,44 @@
+{
+  "name": "osprey-router",
+  "version": "0.0.0",
+  "description": "",
+  "main": "osprey-router.js",
+  "files": [
+    "osprey-router.js",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "istanbul cover node_modules/mocha/bin/_mocha -- -R spec --require test/support/globals.js --bail"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mulesoft-labs/osprey-router.git"
+  },
+  "keywords": [
+    "raml",
+    "osprey",
+    "router",
+    "middleware"
+  ],
+  "author": "MuleSoft, Inc.",
+  "license": "Apache 2.0",
+  "bugs": {
+    "url": "https://github.com/mulesoft-labs/osprey-router/issues"
+  },
+  "homepage": "https://github.com/mulesoft-labs/osprey-router",
+  "dependencies": {
+    "array-flatten": "^1.0.2",
+    "methods": "^1.1.1",
+    "raml-path-match": "^1.0.0",
+    "router": "git://github.com/blakeembrey/router#router-engine"
+  },
+  "devDependencies": {
+    "chai": "^1.10.0",
+    "es6-promise": "^2.0.1",
+    "finalhandler": "^0.3.3",
+    "istanbul": "^0.3.5",
+    "mocha": "^2.1.0",
+    "popsicle": "^0.3.8",
+    "popsicle-server": "0.0.1"
+  }
+}
