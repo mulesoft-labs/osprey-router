@@ -1,14 +1,16 @@
 {
   "name": "osprey-router",
   "version": "0.0.0",
-  "description": "",
+  "description": "Simple middleware-style router for RAML based on router",
   "main": "osprey-router.js",
   "files": [
     "osprey-router.js",
     "LICENSE"
   ],
   "scripts": {
-    "test": "istanbul cover node_modules/mocha/bin/_mocha -- -R spec --require test/support/globals.js --bail"
+    "jshint": "jshint .",
+    "mocha": "istanbul cover node_modules/mocha/bin/_mocha -- -R spec --bail",
+    "test": "npm run jshint && npm run mocha"
   },
   "repository": {
     "type": "git",
@@ -37,6 +39,7 @@
     "es6-promise": "^2.0.1",
     "finalhandler": "^0.3.3",
     "istanbul": "^0.3.5",
+    "jshint": "^2.6.0",
     "mocha": "^2.1.0",
     "popsicle": "^0.3.8",
     "popsicle-server": "0.0.1"

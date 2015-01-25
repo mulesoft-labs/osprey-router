@@ -1,15 +1,14 @@
+ /* istanbul ignore next */
+if (!global.Promise) {
+  require('es6-promise').polyfill();
+}
+
 var methods = require('methods');
 var expect = require('chai').expect;
 var popsicle = require('popsicle');
 var server = require('popsicle-server');
-var Router = require('..');
-var createServer = require('./support/create-server');
-
-function helloWorld (req, res) {
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/plain');
-  res.end('hello, world');
-}
+var finalhandler = require('finalhandler');
+var Router = require('./');
 
 describe('Router', function () {
   it('should be a function', function () {
@@ -183,3 +182,15 @@ describe('Router', function () {
     });
   });
 });
+
+function helloWorld (req, res) {
+  res.statusCode = 200;
+  res.setHeader('Content-Type', 'text/plain');
+  res.end('hello, world');
+}
+
+function createServer (router) {
+  return function (req, res) {
+    router(req, res, finalhandler(req, res));
+  };
+}
