@@ -5,9 +5,19 @@ var ramlPath = require('raml-path-match');
 var slice = Array.prototype.slice;
 
 /**
- * Expose `Router`.
+ * Expose `router`.
  */
-module.exports = Router;
+module.exports = router;
+
+/**
+ * Initialize router instance.
+ *
+ * @param  {Object}   options
+ * @return {Function}
+ */
+function router (options) {
+  return new Router(options);
+}
 
 /**
  * Construct a router instance.
