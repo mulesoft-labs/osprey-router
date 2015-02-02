@@ -1,6 +1,6 @@
 {
   "name": "osprey-router",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Simple middleware-style router for RAML based on router",
   "main": "osprey-router.js",
   "files": [
