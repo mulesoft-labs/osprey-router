@@ -57,7 +57,7 @@ Router.prototype.use = function use () {
     end: false
   });
 
-  return Engine.prototype.use.call(this, match, callbacks);
+  return Engine.prototype.use.call(this, path, match, callbacks);
 };
 
 /**
