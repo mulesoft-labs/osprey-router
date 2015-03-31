@@ -32,7 +32,7 @@
     "array-flatten": "^1.0.2",
     "methods": "^1.1.1",
     "raml-path-match": "^1.1.0",
-    "router": "git://github.com/blakeembrey/router#router-engine"
+    "router": "blakeembrey/router#router-engine"
   },
   "devDependencies": {
     "chai": "^1.10.0",
