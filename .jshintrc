@@ -26,6 +26,7 @@
   "browser":  true,     // Support globals used in a browser environment.
   "globals": {
     "describe": true,
-    "it": true
+    "it": true,
+    "Promise": true
   }
 }
