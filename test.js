@@ -1,7 +1,4 @@
- /* istanbul ignore next */
-if (!global.Promise) {
-  require('es6-promise').polyfill();
-}
+require('es6-promise').polyfill();
 
 var methods = require('methods');
 var expect = require('chai').expect;
