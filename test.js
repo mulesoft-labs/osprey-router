@@ -23,6 +23,20 @@ describe('Router', function () {
       .to.throw(/argument callback is required/);
   });
 
+  it('should not crash with invalid decode', function () {
+    var router = new Router();
+
+    router.get('/{id}', { id: { type: 'string' } }, function (req, res, next) {
+      return next();
+    }, helloWorld);
+
+    return popsicle('/foo%d')
+      .use(server(createServer(router)))
+      .then(function (res) {
+        expect(res.status).to.equal(400);
+      });
+  });
+
   describe('Router#all(path, fn)', function () {
     it('should be chainable', function () {
       var router = new Router();
