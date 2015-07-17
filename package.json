@@ -8,9 +8,10 @@
     "LICENSE"
   ],
   "scripts": {
-    "jshint": "jshint .",
-    "mocha": "istanbul cover node_modules/mocha/bin/_mocha -- -R spec --bail",
-    "test": "npm run jshint && npm run mocha"
+    "lint": "standard",
+    "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- -R spec --bail",
+    "test-spec": "mocha -R spec --bail",
+    "test": "npm run lint && npm run test-cov"
   },
   "repository": {
     "type": "git",
@@ -39,9 +40,9 @@
     "es6-promise": "^2.0.1",
     "finalhandler": "^0.3.3",
     "istanbul": "^0.3.13",
-    "jshint": "^2.6.0",
     "mocha": "^2.1.0",
     "popsicle": "^0.5.12",
-    "popsicle-server": "^1.0.0"
+    "popsicle-server": "^1.0.0",
+    "standard": "^4.5.4"
   }
 }
