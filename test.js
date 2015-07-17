@@ -68,6 +68,19 @@ describe('Router', function () {
       }))
     })
 
+    it('should accept arrays', function () {
+      var router = new Router()
+
+      router.all('/', [helloWorld])
+
+      return popsicle('/')
+        .use(server(createServer(router)))
+        .then(function (res) {
+          expect(res.status).to.equal(200)
+          expect(res.body).to.equal('hello, world')
+        })
+    })
+
     it('should not stack overflow with many registered routes', function () {
       var router = new Router()
 
@@ -96,6 +109,21 @@ describe('Router', function () {
         var router = new Router()
 
         router[method]('/foo', helloWorld)
+
+        return popsicle({ url: '/foo', method: method })
+          .use(server(createServer(router)))
+          .then(function (res) {
+            expect(res.status).to.equal(200)
+            expect(res.body).to.equal(
+              method === 'head' ? null : 'hello, world'
+            )
+          })
+      })
+
+      it('Router#' + method + ' should accept an array', function () {
+        var router = new Router()
+
+        router[method]('/foo', [helloWorld])
 
         return popsicle({ url: '/foo', method: method })
           .use(server(createServer(router)))
@@ -145,6 +173,22 @@ describe('Router', function () {
         res.setHeader('x-url', req.url)
         res.end()
       })
+
+      return popsicle('/foo')
+        .use(server(createServer(router)))
+        .then(function (res) {
+          expect(res.status).to.equal(200)
+          expect(res.get('x-url')).to.equal('/foo')
+        })
+    })
+
+    it('should accept arrays', function () {
+      var router = new Router()
+
+      router.use([function (req, res) {
+        res.setHeader('x-url', req.url)
+        res.end()
+      }])
 
       return popsicle('/foo')
         .use(server(createServer(router)))

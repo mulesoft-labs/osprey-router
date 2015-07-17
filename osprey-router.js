@@ -39,11 +39,11 @@ Router.prototype.use = function use () {
   var path = '/'
   var schema = {}
 
-  if (typeof arguments[0] !== 'function') {
+  if (!isMiddleware(arguments[0])) {
     path = arguments[0]
     offset = 1
 
-    if (typeof arguments[1] !== 'function') {
+    if (!isMiddleware(arguments[1])) {
       schema = arguments[1]
       offset = 2
     }
@@ -76,7 +76,7 @@ Router.prototype.route = function route (path, schema) {
 // create Router#VERB functions
 methods.concat('all').forEach(function (method) {
   Router.prototype[method] = function (path, schema) {
-    var hasSchema = typeof schema !== 'function'
+    var hasSchema = !isMiddleware(schema)
     var route = this.route(path, hasSchema ? schema : null)
 
     route[method].apply(route, slice.call(arguments, hasSchema ? 2 : 1))
@@ -84,3 +84,13 @@ methods.concat('all').forEach(function (method) {
     return this
   }
 })
+
+/**
+ * Check if a value is possible middleware.
+ *
+ * @param  {*}       value
+ * @return {Boolean}
+ */
+function isMiddleware (value) {
+  return typeof value === 'function' || Array.isArray(value)
+}
