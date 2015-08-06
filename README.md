@@ -21,28 +21,28 @@ This module is an instance of [router](https://github.com/pillarjs/router) with 
 All options and functions from [router](https://github.com/pillarjs/router) are supported, except the second argument can be an optional `uriParameters` schema. For example:
 
 ```js
-var finalhandler = require('finalhandler');
-var http = require('http');
-var Router = require('osprey-router');
+var finalhandler = require('finalhandler')
+var http = require('http')
+var Router = require('osprey-router')
 
-var router = Router();
+var router = Router()
 
 router.get('/{userId}', {
   userId: {
     type: 'integer'
   }
 }, function (req, res) {
-  console.log(typeof req.params.userId); //=> "number"
+  console.log(typeof req.params.userId) //=> "number"
 
-  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-  res.end(req.params.userId);
-});
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+  res.end(req.params.userId)
+})
 
 var server = http.createServer(function (req, res) {
-  router(req, res, finalhandler(req, res));
-});
+  router(req, res, finalhandler(req, res))
+})
 
-server.listen(3000);
+server.listen(3000)
 ```
 
 When you specify the parameter type, it'll automatically be parsed in the native JavaScript type.
