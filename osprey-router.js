@@ -1,7 +1,8 @@
 var Engine = require('router/engine')
 var methods = require('methods')
 var flatten = require('array-flatten')
-var ramlPath = require('raml-path-match')
+var ramlPathMatch = require('raml-path-match')
+var extend = require('xtend')
 var slice = Array.prototype.slice
 
 /**
@@ -93,4 +94,27 @@ methods.concat('all').forEach(function (method) {
  */
 function isMiddleware (value) {
   return typeof value === 'function' || Array.isArray(value)
+}
+
+/**
+ * Create a path matching function, with uri param inheritance.
+ */
+function ramlPath (path, schema, options) {
+  var match = ramlPathMatch(path, schema, options)
+
+  return function (pathname, req) {
+    var ramlUriParameters = schema
+
+    // Re-compile when schema is being re-used.
+    // TODO(blakeembrey): Detect and compile when a only a used param changes.
+    if (req.ramlUriParameters) {
+      ramlUriParameters = extend(req.ramlUriParameters, schema)
+      match = ramlPathMatch(path, ramlUriParameters, options)
+    }
+
+    // Store the URI parameters for re-use in later Osprey routers.
+    req.ramlUriParameters = ramlUriParameters
+
+    return match(pathname)
+  }
 }
