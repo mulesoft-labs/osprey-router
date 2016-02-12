@@ -103,18 +103,19 @@ function ramlPath (path, schema, options) {
   var match = ramlPathMatch(path, schema, options)
 
   return function (pathname, req) {
-    var ramlUriParameters = schema
+    var uriParameters = schema
+    var pathMatch = match
 
     // Re-compile when schema is being re-used.
     // TODO(blakeembrey): Detect and compile when a only a used param changes.
     if (req.ramlUriParameters) {
-      ramlUriParameters = extend(req.ramlUriParameters, schema)
-      match = ramlPathMatch(path, ramlUriParameters, options)
+      uriParameters = extend(req.ramlUriParameters, schema)
+      pathMatch = ramlPathMatch(path, uriParameters, options)
     }
 
     // Store the URI parameters for re-use in later Osprey routers.
-    req.ramlUriParameters = ramlUriParameters
+    req.ramlUriParameters = uriParameters
 
-    return match(pathname)
+    return pathMatch(pathname)
   }
 }
