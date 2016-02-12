@@ -32,7 +32,7 @@
   "dependencies": {
     "array-flatten": "^2.0.0",
     "methods": "^1.1.1",
-    "raml-path-match": "^1.2.0",
+    "raml-path-match": "^1.4.0",
     "router": "blakeembrey/router#router-engine",
     "xtend": "^4.0.1"
   },
