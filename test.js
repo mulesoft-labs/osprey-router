@@ -252,8 +252,6 @@ describe('Router', function () {
         type: 'number'
       }
     }, function (req, res, next) {
-      req.id = req.params.id
-
       next()
     })
 

@@ -1,7 +1,7 @@
 var Engine = require('router/engine')
 var methods = require('methods')
 var flatten = require('array-flatten')
-var ramlPathMatch = require('raml-path-match')
+var ramlPath = require('raml-path-match')
 var extend = require('xtend')
 var slice = Array.prototype.slice
 
@@ -24,7 +24,12 @@ function router (options) {
  * Construct a router instance.
  */
 function Router (options) {
-  return Engine.call(this, options)
+  var router = Engine.call(this, options)
+
+  // Construct with default URI parameters.
+  router.ramlUriParameters = options && options.ramlUriParameters || {}
+
+  return router
 }
 
 /**
@@ -38,7 +43,7 @@ Router.prototype = Object.create(Engine.prototype)
 Router.prototype.use = function use () {
   var offset = 0
   var path = '/'
-  var schema = {}
+  var schema
 
   if (!isMiddleware(arguments[0])) {
     path = arguments[0]
@@ -51,12 +56,15 @@ Router.prototype.use = function use () {
   }
 
   var callbacks = flatten(slice.call(arguments, offset))
+  var params = extend(router.ramlUriParameters, schema)
 
-  var match = ramlPath(path, schema, {
+  var match = ramlPath(path, params, {
     sensitive: this.caseSensitive,
     strict: this.strict,
     end: false
   })
+
+  router.ramlUriParameters = params
 
   return Engine.prototype.use.call(this, path, match, callbacks)
 }
@@ -65,11 +73,15 @@ Router.prototype.use = function use () {
  * Create a `raml-path-match` compatible route.
  */
 Router.prototype.route = function route (path, schema) {
-  var match = ramlPath(path, schema, {
+  var params = extend(router.ramlUriParameters, schema)
+
+  var match = ramlPath(path, params, {
     sensitive: this.caseSensitive,
     strict: this.strict,
     end: true
   })
+
+  router.ramlUriParameters = params
 
   return Engine.prototype.route.call(this, path, match)
 }
@@ -94,27 +106,4 @@ methods.concat('all').forEach(function (method) {
  */
 function isMiddleware (value) {
   return typeof value === 'function' || Array.isArray(value)
-}
-
-/**
- * Create a path matching function, with uri param inheritance.
- */
-function ramlPath (path, schema, options) {
-  var match = ramlPathMatch(path, schema, options)
-
-  return function (pathname, req) {
-    var uriParameters = schema
-    var pathMatch = match
-
-    // Re-compile when schema is being re-used.
-    if (req.ramlUriParameters) {
-      uriParameters = extend(req.ramlUriParameters, schema)
-      pathMatch = match.update(uriParameters)
-    }
-
-    // Store the URI parameters for re-use in later Osprey routers.
-    req.ramlUriParameters = uriParameters
-
-    return pathMatch(pathname)
-  }
 }
