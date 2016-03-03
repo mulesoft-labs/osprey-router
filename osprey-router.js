@@ -56,7 +56,7 @@ Router.prototype.use = function use () {
   }
 
   var callbacks = flatten(slice.call(arguments, offset))
-  var params = extend(router.ramlUriParameters, schema)
+  var params = extend(this.ramlUriParameters, schema)
 
   var match = ramlPath(path, params, {
     sensitive: this.caseSensitive,
@@ -64,7 +64,7 @@ Router.prototype.use = function use () {
     end: false
   })
 
-  router.ramlUriParameters = params
+  this.ramlUriParameters = params
 
   return Engine.prototype.use.call(this, path, match, callbacks)
 }
@@ -73,7 +73,7 @@ Router.prototype.use = function use () {
  * Create a `raml-path-match` compatible route.
  */
 Router.prototype.route = function route (path, schema) {
-  var params = extend(router.ramlUriParameters, schema)
+  var params = extend(this.ramlUriParameters, schema)
 
   var match = ramlPath(path, params, {
     sensitive: this.caseSensitive,
@@ -81,7 +81,7 @@ Router.prototype.route = function route (path, schema) {
     end: true
   })
 
-  router.ramlUriParameters = params
+  this.ramlUriParameters = params
 
   return Engine.prototype.route.call(this, path, match)
 }

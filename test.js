@@ -241,13 +241,8 @@ describe('Router', function () {
 
   it('should allow re-use of uri parameters', function () {
     var router = new Router()
-    var router1 = new Router()
-    var router2 = new Router()
 
-    router.use(router1)
-    router.use(router2)
-
-    router1.use('/{id}', {
+    router.use('/{id}', {
       id: {
         type: 'number'
       }
@@ -255,7 +250,7 @@ describe('Router', function () {
       next()
     })
 
-    router2.use('/{id}', function (req, res) {
+    router.use('/{id}', function (req, res) {
       res.setHeader('Content-Type', 'application/json')
       res.end(JSON.stringify(req.params))
     })
