@@ -4,7 +4,7 @@
 [![Build status][travis-image]][travis-url]
 [![Test coverage][coveralls-image]][coveralls-url]
 
-Simple middleware-style router for [RAML](https://github.com/raml-org/raml-spec/blob/master/raml-0.8.md#template-uris-and-uri-parameters) based on [router](https://github.com/pillarjs/router).
+Simple middleware-style router for [RAML](https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md#template-uris-and-uri-parameters) based on [router](https://github.com/pillarjs/router).
 
 ## Installation
 

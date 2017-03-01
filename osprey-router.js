@@ -28,6 +28,7 @@ function Router (options) {
 
   // Construct with default URI parameters.
   router.ramlUriParameters = options && options.ramlUriParameters || {}
+  router.RAMLVersion = options && options.RAMLVersion || undefined
 
   return router
 }
@@ -61,7 +62,8 @@ Router.prototype.use = function use () {
   var match = ramlPath(path, params, {
     sensitive: this.caseSensitive,
     strict: this.strict,
-    end: false
+    end: false,
+    RAMLVersion: this.RAMLVersion
   })
 
   this.ramlUriParameters = params
@@ -78,7 +80,8 @@ Router.prototype.route = function route (path, schema) {
   var match = ramlPath(path, params, {
     sensitive: this.caseSensitive,
     strict: this.strict,
-    end: true
+    end: true,
+    RAMLVersion: this.RAMLVersion
   })
 
   this.ramlUriParameters = params

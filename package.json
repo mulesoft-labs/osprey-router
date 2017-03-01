@@ -1,6 +1,6 @@
 {
   "name": "osprey-router",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Simple middleware-style router for RAML based on router",
   "main": "osprey-router.js",
   "files": [
@@ -32,18 +32,18 @@
   "dependencies": {
     "array-flatten": "^2.0.0",
     "methods": "^1.1.1",
-    "raml-path-match": "^2.0.0",
+    "raml-path-match": "jstoiko/raml-path-match#raml1.0",
     "router": "blakeembrey/router#router-engine",
     "xtend": "^4.0.1"
   },
   "devDependencies": {
-    "chai": "^3.2.0",
+    "chai": "^3.5.0",
     "es6-promise": "^3.0.2",
     "finalhandler": "^0.4.0",
-    "istanbul": "^0.4.2",
-    "mocha": "^2.1.0",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.1.0",
     "popsicle": "^5.0.0",
     "popsicle-server": "^1.0.0",
-    "standard": "^6.0.4"
+    "standard": "^8.3.0"
   }
 }
