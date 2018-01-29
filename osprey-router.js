@@ -1,4 +1,4 @@
-var Engine = require('router/engine')
+var Engine = require('./router/engine')
 var methods = require('methods')
 var flatten = require('array-flatten')
 var ramlPath = require('raml-path-match')

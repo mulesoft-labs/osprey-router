@@ -7,7 +7,7 @@ var expect = require('chai').expect
 var popsicle = require('popsicle')
 var server = require('popsicle-server')
 var finalhandler = require('finalhandler')
-var Router = require('./')
+var Router = require('../osprey-router')
 
 describe('Router', function () {
   it('should be a function', function () {
