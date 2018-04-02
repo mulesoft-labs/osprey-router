@@ -62,7 +62,7 @@ describe('Router', function () {
           .then(function (res) {
             expect(res.status).to.equal(200)
             expect(res.body).to.equal(
-              method === 'head' ? null : 'hello, world'
+              method === 'head' ? '' : 'hello, world'
             )
           })
       }))
@@ -115,7 +115,7 @@ describe('Router', function () {
           .then(function (res) {
             expect(res.status).to.equal(200)
             expect(res.body).to.equal(
-              method === 'head' ? null : 'hello, world'
+              method === 'head' ? '' : 'hello, world'
             )
           })
       })
@@ -130,7 +130,7 @@ describe('Router', function () {
           .then(function (res) {
             expect(res.status).to.equal(200)
             expect(res.body).to.equal(
-              method === 'head' ? null : 'hello, world'
+              method === 'head' ? '' : 'hello, world'
             )
           })
       })
@@ -259,7 +259,7 @@ describe('Router', function () {
       .use(server(createServer(router)))
       .then(function (res) {
         expect(res.status).to.equal(200)
-        expect(res.body).to.deep.equal({ id: 12345 })
+        expect(JSON.parse(res.body)).to.deep.equal({ id: 12345 })
       })
       .then(function () {
         return popsicle.request('/abc').use(server(createServer(router)))

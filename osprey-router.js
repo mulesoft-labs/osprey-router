@@ -27,8 +27,8 @@ function Router (options) {
   var router = Engine.call(this, options)
 
   // Construct with default URI parameters.
-  router.ramlUriParameters = options && options.ramlUriParameters || {}
-  router.RAMLVersion = options && options.RAMLVersion || undefined
+  router.ramlUriParameters = options ? options.ramlUriParameters : {}
+  router.RAMLVersion = options ? options.RAMLVersion : undefined
 
   return router
 }
