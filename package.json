@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "lint": "standard",
-    "test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- -R spec --bail",
+    "test-cov": "nyc node_modules/mocha/bin/_mocha -- -R spec --bail",
     "test-spec": "mocha -R spec --bail",
     "test": "npm run lint && npm run test-cov"
   },
@@ -39,8 +39,8 @@
   "devDependencies": {
     "chai": "^4.1.2",
     "es6-promise": "^4.2.4",
+    "nyc": "^14.1.0",
     "finalhandler": "^1.1.1",
-    "istanbul": "^0.4.5",
     "mocha": "^6.1.4",
     "popsicle": "^10.0.0",
     "popsicle-server": "^2.0.0",
