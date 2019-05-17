@@ -1,10 +1,9 @@
 # Osprey Router
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/mulesoft-labs/osprey-router.svg)](https://greenkeeper.io/)
-
 [![NPM version][npm-image]][npm-url]
 [![Build status][travis-image]][travis-url]
 [![Test coverage][coveralls-image]][coveralls-url]
+[![Greenkeeper badge](https://badges.greenkeeper.io/mulesoft-labs/osprey-router.svg)](https://greenkeeper.io/)
 
 Simple middleware-style router for [RAML](https://github.com/raml-org/raml-spec/blob/master/versions/raml-10/raml-10.md#template-uris-and-uri-parameters) based on [router](https://github.com/pillarjs/router).
 
