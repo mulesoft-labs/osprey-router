@@ -4,10 +4,48 @@ require('es6-promise').polyfill()
 
 var methods = require('methods')
 var expect = require('chai').expect
-var popsicle = require('popsicle')
-var server = require('popsicle-server')
-var finalhandler = require('finalhandler')
 var Router = require('./')
+
+/* Helps using popsicle-server with popsicle version 12+.
+ *
+ * Inspired by popsicle 12.0+ code.
+ */
+function makeFetcher (app) {
+  var compose = require('throwback').compose
+  var Request = require('servie').Request
+  var popsicle = require('popsicle')
+  var popsicleServer = require('popsicle-server')
+  var finalhandler = require('finalhandler')
+
+  // Set response text to "body" property to mimic popsicle v10
+  // response interface.
+
+  function responseBodyMiddleware (req, next) {
+    return next().then(res => {
+      return res.text().then(body => {
+        res.body = body
+        return res
+      })
+    })
+  }
+
+  function createServer (router) {
+    return function (req, res) {
+      router(req, res, finalhandler(req, res))
+    }
+  }
+
+  var popsicleServerMiddleware = popsicleServer(createServer(app))
+  var middleware = compose([
+    responseBodyMiddleware,
+    popsicleServerMiddleware,
+    popsicle.middleware
+  ])
+
+  return {
+    fetch: popsicle.toFetch(middleware, Request)
+  }
+}
 
 describe('Router', function () {
   it('should be a function', function () {
@@ -32,8 +70,9 @@ describe('Router', function () {
       return next()
     }, helloWorld)
 
-    return popsicle.request('/foo%d')
-      .use(server(createServer(router)))
+    return makeFetcher(router).fetch('/foo%d', {
+      method: 'GET'
+    })
       .then(function (res) {
         expect(res.status).to.equal(400)
       })
@@ -57,8 +96,9 @@ describe('Router', function () {
           return
         }
 
-        return popsicle.request({ url: '/', method: method })
-          .use(server(createServer(router)))
+        return makeFetcher(router).fetch('/', {
+          method: method
+        })
           .then(function (res) {
             expect(res.status).to.equal(200)
             expect(res.body).to.equal(
@@ -73,8 +113,9 @@ describe('Router', function () {
 
       router.all('/', [helloWorld])
 
-      return popsicle.request('/')
-        .use(server(createServer(router)))
+      return makeFetcher(router).fetch('/', {
+        method: 'GET'
+      })
         .then(function (res) {
           expect(res.status).to.equal(200)
           expect(res.body).to.equal('hello, world')
@@ -90,8 +131,9 @@ describe('Router', function () {
 
       router.get('/', helloWorld)
 
-      return popsicle.request('/')
-        .use(server(createServer(router)))
+      return makeFetcher(router).fetch('/', {
+        method: 'GET'
+      })
         .then(function (res) {
           expect(res.status).to.equal(200)
           expect(res.body).to.equal('hello, world')
@@ -110,8 +152,9 @@ describe('Router', function () {
 
         router[method]('/foo', helloWorld)
 
-        return popsicle.request({ url: '/foo', method: method })
-          .use(server(createServer(router)))
+        return makeFetcher(router).fetch('/foo', {
+          method: method
+        })
           .then(function (res) {
             expect(res.status).to.equal(200)
             expect(res.body).to.equal(
@@ -125,8 +168,9 @@ describe('Router', function () {
 
         router[method]('/foo', [helloWorld])
 
-        return popsicle.request({ url: '/foo', method: method })
-          .use(server(createServer(router)))
+        return makeFetcher(router).fetch('/foo', {
+          method: method
+        })
           .then(function (res) {
             expect(res.status).to.equal(200)
             expect(res.body).to.equal(
@@ -155,11 +199,12 @@ describe('Router', function () {
           res.end()
         })
 
-        return popsicle.request({ url: '/123', method: method })
-          .use(server(createServer(router)))
+        return makeFetcher(router).fetch('/123', {
+          method: method
+        })
           .then(function (res) {
             expect(res.status).to.equal(200)
-            expect(res.get('x-typeof')).to.equal('number')
+            expect(res.headers.get('x-typeof')).to.equal('number')
           })
       })
     })
@@ -174,11 +219,12 @@ describe('Router', function () {
         res.end()
       })
 
-      return popsicle.request('/foo')
-        .use(server(createServer(router)))
+      return makeFetcher(router).fetch('/foo', {
+        method: 'GET'
+      })
         .then(function (res) {
           expect(res.status).to.equal(200)
-          expect(res.get('x-url')).to.equal('/foo')
+          expect(res.headers.get('x-url')).to.equal('/foo')
         })
     })
 
@@ -190,11 +236,12 @@ describe('Router', function () {
         res.end()
       }])
 
-      return popsicle.request('/foo')
-        .use(server(createServer(router)))
+      return makeFetcher(router).fetch('/foo', {
+        method: 'GET'
+      })
         .then(function (res) {
           expect(res.status).to.equal(200)
-          expect(res.get('x-url')).to.equal('/foo')
+          expect(res.headers.get('x-url')).to.equal('/foo')
         })
     })
 
@@ -206,11 +253,12 @@ describe('Router', function () {
         res.end()
       })
 
-      return popsicle.request('/foo')
-        .use(server(createServer(router)))
+      return makeFetcher(router).fetch('/foo', {
+        method: 'GET'
+      })
         .then(function (res) {
           expect(res.status).to.equal(200)
-          expect(res.get('x-url')).to.equal('/')
+          expect(res.headers.get('x-url')).to.equal('/')
         })
     })
 
@@ -230,11 +278,12 @@ describe('Router', function () {
         res.end()
       })
 
-      return popsicle.request('/bar')
-        .use(server(createServer(router)))
+      return makeFetcher(router).fetch('/bar', {
+        method: 'GET'
+      })
         .then(function (res) {
           expect(res.status).to.equal(200)
-          expect(res.get('x-url')).to.equal('/')
+          expect(res.headers.get('x-url')).to.equal('/')
         })
     })
   })
@@ -255,14 +304,17 @@ describe('Router', function () {
       res.end(JSON.stringify(req.params))
     })
 
-    return popsicle.request('/12345')
-      .use(server(createServer(router)))
+    return makeFetcher(router).fetch('/12345', {
+      method: 'GET'
+    })
       .then(function (res) {
         expect(res.status).to.equal(200)
         expect(JSON.parse(res.body)).to.deep.equal({ id: 12345 })
       })
       .then(function () {
-        return popsicle.request('/abc').use(server(createServer(router)))
+        return makeFetcher(router).fetch('/abc', {
+          method: 'GET'
+        })
       })
       .then(function (res) {
         expect(res.status).to.equal(404)
@@ -274,10 +326,4 @@ function helloWorld (req, res) {
   res.statusCode = 200
   res.setHeader('Content-Type', 'text/plain')
   res.end('hello, world')
-}
-
-function createServer (router) {
-  return function (req, res) {
-    router(req, res, finalhandler(req, res))
-  }
 }
