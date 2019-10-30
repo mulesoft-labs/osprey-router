@@ -1,9 +1,9 @@
-var Engine = require('router/engine')
-var methods = require('methods')
-var flatten = require('array-flatten')
-var ramlPath = require('raml-path-match')
-var extend = require('xtend')
-var slice = Array.prototype.slice
+const Engine = require('router/engine')
+const methods = require('methods')
+const flatten = require('array-flatten')
+const ramlPath = require('raml-path-match')
+const extend = require('xtend')
+const slice = Array.prototype.slice
 
 /**
  * Expose `router`.
@@ -24,7 +24,7 @@ function router (options) {
  * Construct a router instance.
  */
 function Router (options) {
-  var router = Engine.call(this, options)
+  const router = Engine.call(this, options)
 
   // Construct with default URI parameters.
   router.ramlUriParameters = options ? options.ramlUriParameters : {}
@@ -42,24 +42,27 @@ Router.prototype = Object.create(Engine.prototype)
  * Create a `raml-path-match` compatible `.use`.
  */
 Router.prototype.use = function use () {
-  var offset = 0
-  var path = '/'
-  var schema
+  let offset = 0
+  let path = '/'
+  let schema
 
   if (!isMiddleware(arguments[0])) {
     path = arguments[0]
     offset = 1
 
     if (!isMiddleware(arguments[1])) {
+      // TODO:
+      //     This is a Parameter[] now, not a 'raml-path-match' schema.
+      //     Fix in all the places uri params are used/merged.
       schema = arguments[1]
       offset = 2
     }
   }
 
-  var callbacks = flatten(slice.call(arguments, offset))
-  var params = extend(this.ramlUriParameters, schema)
+  const callbacks = flatten(slice.call(arguments, offset))
+  const params = extend(this.ramlUriParameters, schema)
 
-  var match = ramlPath(path, params, {
+  const match = ramlPath(path, params, {
     sensitive: this.caseSensitive,
     strict: this.strict,
     end: false,
@@ -75,9 +78,9 @@ Router.prototype.use = function use () {
  * Create a `raml-path-match` compatible route.
  */
 Router.prototype.route = function route (path, schema) {
-  var params = extend(this.ramlUriParameters, schema)
+  const params = extend(this.ramlUriParameters, schema)
 
-  var match = ramlPath(path, params, {
+  const match = ramlPath(path, params, {
     sensitive: this.caseSensitive,
     strict: this.strict,
     end: true,
@@ -92,8 +95,8 @@ Router.prototype.route = function route (path, schema) {
 // create Router#VERB functions
 methods.concat('all').forEach(function (method) {
   Router.prototype[method] = function (path, schema) {
-    var hasSchema = !isMiddleware(schema)
-    var route = this.route(path, hasSchema ? schema : null)
+    const hasSchema = !isMiddleware(schema)
+    const route = this.route(path, hasSchema ? schema : null)
 
     route[method].apply(route, slice.call(arguments, hasSchema ? 2 : 1))
 
