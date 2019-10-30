@@ -27,7 +27,9 @@ function Router (options) {
   const router = Engine.call(this, options)
 
   // Construct with default URI parameters.
-  router.ramlUriParameters = options ? options.ramlUriParameters : {}
+  router.ramlUriParameters = options
+    ? extractParams(options.ramlUriParameters)
+    : {}
   router.RAMLVersion = options ? options.RAMLVersion : undefined
 
   return router
@@ -51,10 +53,7 @@ Router.prototype.use = function use () {
     offset = 1
 
     if (!isMiddleware(arguments[1])) {
-      // TODO:
-      //     This is a Parameter[] now, not a 'raml-path-match' schema.
-      //     Fix in all the places uri params are used/merged.
-      schema = arguments[1]
+      schema = extractParams(arguments[1])
       offset = 2
     }
   }
@@ -78,7 +77,7 @@ Router.prototype.use = function use () {
  * Create a `raml-path-match` compatible route.
  */
 Router.prototype.route = function route (path, schema) {
-  const params = extend(this.ramlUriParameters, schema)
+  const params = extend(this.ramlUriParameters, extractParams(schema))
 
   const match = ramlPath(path, params, {
     sensitive: this.caseSensitive,
@@ -93,12 +92,13 @@ Router.prototype.route = function route (path, schema) {
 }
 
 // create Router#VERB functions
-methods.concat('all').forEach(function (method) {
-  Router.prototype[method] = function (path, schema) {
+methods.concat('all').forEach(function (methodName) {
+  Router.prototype[methodName] = function (path, schema) {
+    schema = extractParams(schema)
     const hasSchema = !isMiddleware(schema)
     const route = this.route(path, hasSchema ? schema : null)
 
-    route[method].apply(route, slice.call(arguments, hasSchema ? 2 : 1))
+    route[methodName].apply(route, slice.call(arguments, hasSchema ? 2 : 1))
 
     return this
   }
@@ -112,4 +112,27 @@ methods.concat('all').forEach(function (method) {
  */
 function isMiddleware (value) {
   return typeof value === 'function' || Array.isArray(value)
+}
+
+/**
+ * Extracts uri parameters data from AMF model.
+ *
+ * @param  {Array<webapi-parser.Parameter>} params
+ * @return {Object} Uri params data compatible with 'raml-path-match'
+ */
+function extractParams (params) {
+  if (!params || !Array.isArray(params) || params.length < 1) {
+    return params
+  }
+  const data = {}
+  params.forEach(param => {
+    const name = param.name.value()
+    data[name] = {
+      name: name,
+      displayName: name,
+      required: !!param.required.value(),
+      type: [param.schema.dataType.value().split('#').pop()]
+    }
+  })
+  return data
 }
