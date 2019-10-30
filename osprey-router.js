@@ -94,8 +94,10 @@ Router.prototype.route = function route (path, schema) {
 // create Router#VERB functions
 methods.concat('all').forEach(function (methodName) {
   Router.prototype[methodName] = function (path, schema) {
-    schema = extractParams(schema)
     const hasSchema = !isMiddleware(schema)
+    if (hasSchema) {
+      schema = extractParams(schema)
+    }
     const route = this.route(path, hasSchema ? schema : null)
 
     route[methodName].apply(route, slice.call(arguments, hasSchema ? 2 : 1))
@@ -111,7 +113,10 @@ methods.concat('all').forEach(function (methodName) {
  * @return {Boolean}
  */
 function isMiddleware (value) {
-  return typeof value === 'function' || Array.isArray(value)
+  const isFunction = typeof value === 'function'
+  const firstElementIsFunction = (
+    Array.isArray(value) && typeof value[0] === 'function')
+  return isFunction || firstElementIsFunction
 }
 
 /**
@@ -136,3 +141,8 @@ function extractParams (params) {
   })
   return data
 }
+
+
+//
+// TODO: ^ Extract all the constraints that `raml-path-match` supports
+//
