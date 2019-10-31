@@ -21,7 +21,13 @@ function router (options) {
 }
 
 /**
- * Construct a router instance.
+ * Constructs a router instance.
+ *
+ * @param {Object} options Following options are supported:
+ *    ramlUriParameters. Either a raml-1-parser params schema or an array
+ *      of `webapi-parser.Parameter`;
+ *    RAMLVersion: String.
+ * @return {Engine}
  */
 function Router (options) {
   const router = Engine.call(this, options)
@@ -41,7 +47,11 @@ function Router (options) {
 Router.prototype = Object.create(Engine.prototype)
 
 /**
- * Create a `raml-path-match` compatible `.use`.
+ * Creates a `raml-path-match` compatible `.use`.
+ *
+ * When uri parameters schema is passed as a second parameter,
+ * it can be either a raml-1-parser uriParameters or an array of
+ * `webapi-parser.Parameter`
  */
 Router.prototype.use = function use () {
   let offset = 0
@@ -74,7 +84,10 @@ Router.prototype.use = function use () {
 }
 
 /**
- * Create a `raml-path-match` compatible route.
+ * Creates a `raml-path-match` compatible route.
+ *
+ * @param  {String} path
+ * @param  {Object | Array<webapi-parser.Parameter>} schema
  */
 Router.prototype.route = function route (path, schema) {
   const params = extend(this.ramlUriParameters, extractParams(schema))
@@ -91,7 +104,14 @@ Router.prototype.route = function route (path, schema) {
   return Engine.prototype.route.call(this, path, match)
 }
 
-// create Router#VERB functions
+//
+/**
+ * Create Router#VERB functions.
+ *
+ * Callbacks' params are as follows:
+ * @param  {String} path
+ * @param  {Object | Array<webapi-parser.Parameter>} schema
+ */
 methods.concat('all').forEach(function (methodName) {
   Router.prototype[methodName] = function (path, schema) {
     const hasSchema = !isMiddleware(schema)
@@ -132,17 +152,36 @@ function extractParams (params) {
   const data = {}
   params.forEach(param => {
     const name = param.name.value()
-    data[name] = {
+    const sch = param.schema
+    const type = sch.dataType.value().split('#').pop()
+    const paramData = {
       name: name,
       displayName: name,
       required: !!param.required.value(),
-      type: [param.schema.dataType.value().split('#').pop()]
+      type: [type]
     }
+    if (sch.values && sch.values.length > 0) {
+      paramData.enum = sch.values.map(val => val.value.value())
+    }
+    const extraData = {
+      format: sch.format.value(),
+      default: sch.defaultValueStr.value(),
+      minimum: sch.minimum.value(),
+      maximum: sch.maximum.value(),
+      multipleOf: sch.multipleOf.value(),
+      minLength: sch.minLength.value(),
+      maxLength: sch.maxLength.value(),
+      pattern: sch.pattern.value()
+    }
+    Object.entries(extraData).forEach(([key, val]) => {
+      // TODO
+      // Use this "if" when fixed: https://github.com/aml-org/amf/issues/562
+      // if (val !== null && val !== undefined) {
+      if (val !== null && val !== undefined && val !== 0) {
+        paramData[key] = val
+      }
+    })
+    data[name] = paramData
   })
   return data
 }
-
-
-//
-// TODO: ^ Extract all the constraints that `raml-path-match` supports
-//

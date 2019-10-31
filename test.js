@@ -1,4 +1,4 @@
-/* global describe, it */
+/* global describe, it, before */
 
 require('es6-promise').polyfill()
 
@@ -48,6 +48,10 @@ function makeFetcher (app) {
   }
 }
 
+before(async function () {
+  await wp.WebApiParser.init()
+})
+
 describe('Router', function () {
   it('should be a function', function () {
     expect(Router).to.be.a('function')
@@ -96,13 +100,14 @@ describe('Router', function () {
             .withName('schema')
             .withDataType('http://www.w3.org/2001/XMLSchema#string'))
     ]
-    const router = new Router({ ramlUriParameters: params.params })
+    const router = new Router({ ramlUriParameters: params })
     expect(router.ramlUriParameters).to.deep.equal({
       id: {
         name: 'id',
         displayName: 'id',
         required: true,
         type: ['integer']
+
       },
       name: {
         name: 'name',
@@ -222,7 +227,7 @@ describe('Router', function () {
         return
       }
 
-      it('Router#' + method, function () {
+      it('Router#' + method + ' raml-1-parser params', function () {
         const router = new Router()
 
         router[method]('/{id}', {
@@ -230,6 +235,31 @@ describe('Router', function () {
             type: 'number'
           }
         }, function (req, res) {
+          res.setHeader('x-typeof', typeof req.params.id)
+          res.end()
+        })
+
+        return makeFetcher(router).fetch('/123', {
+          method: method
+        })
+          .then(function (res) {
+            expect(res.status).to.equal(200)
+            expect(res.headers.get('x-typeof')).to.equal('number')
+          })
+      })
+      it('Router#' + method + ' webapi-parser.Parameter[]', function () {
+        const router = new Router()
+        const params = [
+          new wp.model.domain.Parameter()
+            .withName('id')
+            .withRequired(true)
+            .withSchema(
+              new wp.model.domain.ScalarShape()
+                .withName('schema')
+                .withDataType('http://www.w3.org/2001/XMLSchema#number'))
+        ]
+
+        router[method]('/{id}', params, function (req, res) {
           res.setHeader('x-typeof', typeof req.params.id)
           res.end()
         })
@@ -309,6 +339,37 @@ describe('Router', function () {
           ]
         }
       }, function (req, res) {
+        res.setHeader('x-url', req.url)
+        res.end()
+      })
+
+      return makeFetcher(router).fetch('/bar', {
+        method: 'GET'
+      })
+        .then(function (res) {
+          expect(res.status).to.equal(200)
+          expect(res.headers.get('x-url')).to.equal('/')
+        })
+    })
+
+    it('should accept a path and webapi-parser.Parameter[]', function () {
+      const router = new Router()
+      const params = [
+        new wp.model.domain.Parameter()
+          .withName('path')
+          .withRequired(true)
+          .withSchema(
+            new wp.model.domain.ScalarShape()
+              .withName('schema')
+              .withDataType('http://www.w3.org/2001/XMLSchema#string')
+              .withValues([
+                new wp.model.domain.ScalarNode('foo', 'string'),
+                new wp.model.domain.ScalarNode('bar', 'string')
+              ])
+          )
+      ]
+
+      router.use('/{path}', params, function (req, res) {
         res.setHeader('x-url', req.url)
         res.end()
       })
