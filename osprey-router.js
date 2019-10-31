@@ -24,8 +24,7 @@ function router (options) {
  * Constructs a router instance.
  *
  * @param {Object} options Following options are supported:
- *    ramlUriParameters. Either a raml-1-parser params schema or an array
- *      of `webapi-parser.Parameter`;
+ *    ramlUriParameters. Array<webapi-parser.Parameter>
  *    RAMLVersion: String.
  * @return {Engine}
  */
@@ -50,8 +49,7 @@ Router.prototype = Object.create(Engine.prototype)
  * Creates a `raml-path-match` compatible `.use`.
  *
  * When uri parameters schema is passed as a second parameter,
- * it can be either a raml-1-parser uriParameters or an array of
- * `webapi-parser.Parameter`
+ * it must be an array of `webapi-parser.Parameter`.
  */
 Router.prototype.use = function use () {
   let offset = 0

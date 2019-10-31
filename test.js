@@ -70,8 +70,17 @@ describe('Router', function () {
 
   it('should not crash with invalid decode', function () {
     const router = new Router()
+    const params = [
+      new wp.model.domain.Parameter()
+        .withName('id')
+        .withRequired(true)
+        .withSchema(
+          new wp.model.domain.ScalarShape()
+            .withName('schema')
+            .withDataType('http://www.w3.org/2001/XMLSchema#string'))
+    ]
 
-    router.get('/{id}', { id: { type: 'string' } }, function (req, res, next) {
+    router.get('/{id}', params, function (req, res, next) {
       return next()
     }, helloWorld)
 
@@ -227,26 +236,6 @@ describe('Router', function () {
         return
       }
 
-      it('Router#' + method + ' raml-1-parser params', function () {
-        const router = new Router()
-
-        router[method]('/{id}', {
-          id: {
-            type: 'number'
-          }
-        }, function (req, res) {
-          res.setHeader('x-typeof', typeof req.params.id)
-          res.end()
-        })
-
-        return makeFetcher(router).fetch('/123', {
-          method: method
-        })
-          .then(function (res) {
-            expect(res.status).to.equal(200)
-            expect(res.headers.get('x-typeof')).to.equal('number')
-          })
-      })
       it('Router#' + method + ' webapi-parser.Parameter[]', function () {
         const router = new Router()
         const params = [
@@ -327,31 +316,6 @@ describe('Router', function () {
         })
     })
 
-    it('should accept a path and schema', function () {
-      const router = new Router()
-
-      router.use('/{path}', {
-        path: {
-          type: 'string',
-          enum: [
-            'foo',
-            'bar'
-          ]
-        }
-      }, function (req, res) {
-        res.setHeader('x-url', req.url)
-        res.end()
-      })
-
-      return makeFetcher(router).fetch('/bar', {
-        method: 'GET'
-      })
-        .then(function (res) {
-          expect(res.status).to.equal(200)
-          expect(res.headers.get('x-url')).to.equal('/')
-        })
-    })
-
     it('should accept a path and webapi-parser.Parameter[]', function () {
       const router = new Router()
       const params = [
@@ -386,12 +350,17 @@ describe('Router', function () {
 
   it('should allow re-use of uri parameters', function () {
     const router = new Router()
+    const params = [
+      new wp.model.domain.Parameter()
+        .withName('id')
+        .withRequired(true)
+        .withSchema(
+          new wp.model.domain.ScalarShape()
+            .withName('schema')
+            .withDataType('http://www.w3.org/2001/XMLSchema#number'))
+    ]
 
-    router.use('/{id}', {
-      id: {
-        type: 'number'
-      }
-    }, function (req, res, next) {
+    router.use('/{id}', params, function (req, res, next) {
       next()
     })
 
