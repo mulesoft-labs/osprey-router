@@ -54,29 +54,29 @@ Router.prototype = Object.create(Engine.prototype)
 Router.prototype.use = function use () {
   let offset = 0
   let path = '/'
-  let schema
+  let uriParams
 
   if (!isMiddleware(arguments[0])) {
     path = arguments[0]
     offset = 1
 
     if (!isMiddleware(arguments[1])) {
-      schema = extractParams(arguments[1])
+      uriParams = extractParams(arguments[1])
       offset = 2
     }
   }
 
   const callbacks = flatten(slice.call(arguments, offset))
-  const params = extend(this.ramlUriParameters, schema)
+  uriParams = extend(this.ramlUriParameters, uriParams)
 
-  const match = ramlPath(path, params, {
+  const match = ramlPath(path, uriParams, {
     sensitive: this.caseSensitive,
     strict: this.strict,
     end: false,
     RAMLVersion: this.RAMLVersion
   })
 
-  this.ramlUriParameters = params
+  this.ramlUriParameters = uriParams
 
   return Engine.prototype.use.call(this, path, match, callbacks)
 }
@@ -85,19 +85,19 @@ Router.prototype.use = function use () {
  * Creates a `raml-path-match` compatible route.
  *
  * @param  {String} path
- * @param  {Object | Array<webapi-parser.Parameter>} schema
+ * @param  {Object | Array<webapi-parser.Parameter>} uriParams
  */
-Router.prototype.route = function route (path, schema) {
-  const params = extend(this.ramlUriParameters, extractParams(schema))
+Router.prototype.route = function route (path, uriParams) {
+  uriParams = extend(this.ramlUriParameters, extractParams(uriParams))
 
-  const match = ramlPath(path, params, {
+  const match = ramlPath(path, uriParams, {
     sensitive: this.caseSensitive,
     strict: this.strict,
     end: true,
     RAMLVersion: this.RAMLVersion
   })
 
-  this.ramlUriParameters = params
+  this.ramlUriParameters = uriParams
 
   return Engine.prototype.route.call(this, path, match)
 }
@@ -108,17 +108,17 @@ Router.prototype.route = function route (path, schema) {
  *
  * Callbacks' params are as follows:
  * @param  {String} path
- * @param  {Object | Array<webapi-parser.Parameter>} schema
+ * @param  {Object | Array<webapi-parser.Parameter>} uriParams
  */
 methods.concat('all').forEach(function (methodName) {
-  Router.prototype[methodName] = function (path, schema) {
-    const hasSchema = !isMiddleware(schema)
-    if (hasSchema) {
-      schema = extractParams(schema)
+  Router.prototype[methodName] = function (path, uriParams) {
+    const hasUriParams = !isMiddleware(uriParams)
+    if (hasUriParams) {
+      uriParams = extractParams(uriParams)
     }
-    const route = this.route(path, hasSchema ? schema : null)
+    const route = this.route(path, hasUriParams ? uriParams : null)
 
-    route[methodName].apply(route, slice.call(arguments, hasSchema ? 2 : 1))
+    route[methodName].apply(route, slice.call(arguments, hasUriParams ? 2 : 1))
 
     return this
   }
