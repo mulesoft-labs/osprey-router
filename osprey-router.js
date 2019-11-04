@@ -162,20 +162,17 @@ function extractParams (params) {
       paramData.enum = sch.values.map(val => val.value.value())
     }
     const extraData = {
-      format: sch.format.value(),
-      default: sch.defaultValueStr.value(),
-      minimum: sch.minimum.value(),
-      maximum: sch.maximum.value(),
-      multipleOf: sch.multipleOf.value(),
-      minLength: sch.minLength.value(),
-      maxLength: sch.maxLength.value(),
-      pattern: sch.pattern.value()
+      format: sch.format.option,
+      default: sch.defaultValueStr.option,
+      minimum: sch.minimum.option,
+      maximum: sch.maximum.option,
+      multipleOf: sch.multipleOf.option,
+      minLength: sch.minLength.option,
+      maxLength: sch.maxLength.option,
+      pattern: sch.pattern.option
     }
     Object.entries(extraData).forEach(([key, val]) => {
-      // TODO
-      // Use this "if" when fixed: https://github.com/aml-org/amf/issues/562
-      // if (val !== null && val !== undefined) {
-      if (val !== null && val !== undefined && val !== 0) {
+      if (val !== null && val !== undefined) {
         paramData[key] = val
       }
     })
