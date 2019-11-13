@@ -245,7 +245,7 @@ describe('Router', function () {
             .withSchema(
               new wp.model.domain.ScalarShape()
                 .withName('schema')
-                .withDataType('http://www.w3.org/2001/XMLSchema#number'))
+                .withDataType('http://a.ml/vocabularies/shapes#number'))
         ]
 
         router[method]('/{id}', params, function (req, res) {
@@ -357,7 +357,7 @@ describe('Router', function () {
         .withSchema(
           new wp.model.domain.ScalarShape()
             .withName('schema')
-            .withDataType('http://www.w3.org/2001/XMLSchema#number'))
+            .withDataType('http://a.ml/vocabularies/shapes#number'))
     ]
 
     router.use('/{id}', params, function (req, res, next) {
