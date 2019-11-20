@@ -110,21 +110,7 @@ describe('Router', function () {
             .withDataType('http://www.w3.org/2001/XMLSchema#string'))
     ]
     const router = new Router({ ramlUriParameters: params })
-    expect(router.ramlUriParameters).to.deep.equal({
-      id: {
-        name: 'id',
-        displayName: 'id',
-        required: true,
-        type: ['integer']
-
-      },
-      name: {
-        name: 'name',
-        displayName: 'name',
-        required: false,
-        type: ['string']
-      }
-    })
+    expect(router.ramlUriParameters).to.deep.equal(params)
   })
 
   describe('Router#all(path, fn)', function () {

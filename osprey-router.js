@@ -1,8 +1,7 @@
 const Engine = require('router/engine')
 const methods = require('methods')
 const flatten = require('array-flatten')
-const ramlPath = require('raml-path-match')
-const extend = require('xtend')
+const ramlPathMatch = require('raml-path-match')
 const slice = Array.prototype.slice
 
 /**
@@ -24,7 +23,7 @@ function router (options) {
  * Constructs a router instance.
  *
  * @param {Object} options Following options are supported:
- *    ramlUriParameters. Array<webapi-parser.Parameter>
+ *    ramlUriParameters. Array.<webapi-parser.Parameter>
  *    RAMLVersion: String.
  * @return {Engine}
  */
@@ -33,8 +32,8 @@ function Router (options) {
 
   // Construct with default URI parameters.
   router.ramlUriParameters = options
-    ? extractParams(options.ramlUriParameters)
-    : {}
+    ? options.ramlUriParameters
+    : []
   router.RAMLVersion = options ? options.RAMLVersion : undefined
 
   return router
@@ -61,19 +60,19 @@ Router.prototype.use = function use () {
     offset = 1
 
     if (!isMiddleware(arguments[1])) {
-      uriParams = extractParams(arguments[1])
+      uriParams = arguments[1]
       offset = 2
     }
   }
 
   const callbacks = flatten(slice.call(arguments, offset))
-  uriParams = extend(this.ramlUriParameters, uriParams)
 
-  const match = ramlPath(path, uriParams, {
+  uriParams = extendParams(this.ramlUriParameters, uriParams)
+
+  const match = ramlPathMatch(path, uriParams, {
     sensitive: this.caseSensitive,
     strict: this.strict,
-    end: false,
-    RAMLVersion: this.RAMLVersion
+    end: false
   })
 
   this.ramlUriParameters = uriParams
@@ -84,17 +83,16 @@ Router.prototype.use = function use () {
 /**
  * Creates a `raml-path-match` compatible route.
  *
- * @param  {String} path
- * @param  {Object | Array<webapi-parser.Parameter>} uriParams
+ * @param  {String}                          path
+ * @param  {Array.<webapi-parser.Parameter>} uriParams
  */
 Router.prototype.route = function route (path, uriParams) {
-  uriParams = extend(this.ramlUriParameters, extractParams(uriParams))
+  uriParams = extendParams(this.ramlUriParameters, uriParams)
 
-  const match = ramlPath(path, uriParams, {
+  const match = ramlPathMatch(path, uriParams, {
     sensitive: this.caseSensitive,
     strict: this.strict,
-    end: true,
-    RAMLVersion: this.RAMLVersion
+    end: true
   })
 
   this.ramlUriParameters = uriParams
@@ -107,15 +105,12 @@ Router.prototype.route = function route (path, uriParams) {
  * Create Router#VERB functions.
  *
  * Callbacks' params are as follows:
- * @param  {String} path
- * @param  {Object | Array<webapi-parser.Parameter>} uriParams
+ * @param  {String}                         path
+ * @param  {Array.<webapi-parser.Parameter>} uriParams
  */
 methods.concat('all').forEach(function (methodName) {
   Router.prototype[methodName] = function (path, uriParams) {
     const hasUriParams = !isMiddleware(uriParams)
-    if (hasUriParams) {
-      uriParams = extractParams(uriParams)
-    }
     const route = this.route(path, hasUriParams ? uriParams : null)
 
     route[methodName].apply(route, slice.call(arguments, hasUriParams ? 2 : 1))
@@ -138,45 +133,23 @@ function isMiddleware (value) {
 }
 
 /**
- * Extracts uri parameters data from AMF model.
+ * Extends target list of Parameters with a source one.
+ * Parameters from source override parameters from target with
+ * the same IDs.
  *
- * @param  {Array<webapi-parser.Parameter>} params
- * @return {Object} Uri params data compatible with 'raml-path-match'
+ * @param  {Array.<webapi-parser.Parameter>} target
+ * @param  {Array.<webapi-parser.Parameter>} source
+ * @return {Boolean}
  */
-function extractParams (params) {
-  if (!params || !Array.isArray(params) || params.length < 1) {
-    return params
-  }
-  const data = {}
-  params.forEach(param => {
-    const name = param.name.value()
-    const sch = param.schema
-    const type = sch.dataType.value().split('#').pop()
-    const paramData = {
-      name: name,
-      displayName: name,
-      required: !!param.required.value(),
-      type: [type]
+function extendParams (target, source) {
+  target = target || []
+  source = source || []
+  const params = [...source]
+  const sourceIds = source.map(p => p.id)
+  target.forEach(param => {
+    if (!sourceIds.includes(param.id)) {
+      params.push(param)
     }
-    if (sch.values && sch.values.length > 0) {
-      paramData.enum = sch.values.map(val => val.value.value())
-    }
-    const extraData = {
-      format: sch.format.option,
-      default: sch.defaultValueStr.option,
-      minimum: sch.minimum.option,
-      maximum: sch.maximum.option,
-      multipleOf: sch.multipleOf.option,
-      minLength: sch.minLength.option,
-      maxLength: sch.maxLength.option,
-      pattern: sch.pattern.option
-    }
-    Object.entries(extraData).forEach(([key, val]) => {
-      if (val !== null && val !== undefined) {
-        paramData[key] = val
-      }
-    })
-    data[name] = paramData
   })
-  return data
+  return params
 }
