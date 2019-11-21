@@ -30,7 +30,7 @@
   },
   "homepage": "https://github.com/mulesoft-labs/osprey-router",
   "dependencies": {
-    "array-flatten": "^2.0.0",
+    "array-flatten": "^3.0.0",
     "methods": "^1.1.1",
     "raml-path-match": "^2.2.2",
     "router": "blakeembrey/router#router-engine",
