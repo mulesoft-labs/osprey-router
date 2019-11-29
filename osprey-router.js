@@ -24,7 +24,6 @@ function router (options) {
  *
  * @param {Object} options Following options are supported:
  *    ramlUriParameters. Array.<webapi-parser.Parameter>
- *    RAMLVersion: String.
  * @return {Engine}
  */
 function Router (options) {
@@ -34,7 +33,6 @@ function Router (options) {
   router.ramlUriParameters = options
     ? options.ramlUriParameters
     : []
-  router.RAMLVersion = options ? options.RAMLVersion : undefined
 
   return router
 }
