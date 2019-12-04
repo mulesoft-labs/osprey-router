@@ -45,6 +45,6 @@
     "popsicle-server": "^3.0.0",
     "standard": "^14.3.1",
     "throwback": "^4.1.0",
-    "webapi-parser": "^0.3.2"
+    "webapi-parser": "^0.4.0"
   }
 }
