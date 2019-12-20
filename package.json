@@ -32,8 +32,8 @@
   "dependencies": {
     "array-flatten": "^3.0.0",
     "methods": "^1.1.1",
-    "raml-path-match": "^2.2.2",
-    "router": "blakeembrey/router#router-engine"
+    "raml-path-match": "mulesoft-labs/raml-path-match#rework_webapi_parser",
+    "router": "postatum/router#engine-with-master"
   },
   "devDependencies": {
     "chai": "^4.1.2",
