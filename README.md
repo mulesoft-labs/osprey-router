@@ -19,27 +19,25 @@ This module is an instance of [router](https://github.com/pillarjs/router) with 
 
 ### Router(options)
 
-All options and functions from [router](https://github.com/pillarjs/router) are supported, except the second argument can be an optional `uriParameters` schema. For example:
+All options and functions from [router](https://github.com/pillarjs/router) are supported, except the second argument can be an optional array of [webapi-parser](https://github.com/raml-org/webapi-parser) `Parameter` objects. For example:
 
 ```js
-var finalhandler = require('finalhandler')
-var http = require('http')
-var Router = require('osprey-router')
+const finalhandler = require('finalhandler')
+const http = require('http')
+const Router = require('osprey-router')
+const utils = require('./utils')
 
-var router = Router()
+const router = Router()
+const parameters = utils.getParametersSomehow()
 
-router.get('/{userId}', {
-  userId: {
-    type: 'integer'
-  }
-}, function (req, res) {
-  console.log(typeof req.params.userId) //=> "number"
+router.get('/{userId}', parameters, function (req, res) {
+  console.log(typeof req.params.userId)
 
   res.setHeader('Content-Type', 'text/plain; charset=utf-8')
   res.end(req.params.userId)
 })
 
-var server = http.createServer(function (req, res) {
+const server = http.createServer(function (req, res) {
   router(req, res, finalhandler(req, res))
 })
 
