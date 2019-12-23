@@ -28,7 +28,7 @@ const Router = require('osprey-router')
 const utils = require('./utils')
 
 const router = Router()
-const parameters = utils.getParametersSomehow()
+const parameters = utils.getUriParameters()
 
 router.get('/{userId}', parameters, function (req, res) {
   console.log(typeof req.params.userId)
