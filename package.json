@@ -33,7 +33,7 @@
     "array-flatten": "^3.0.0",
     "methods": "^1.1.1",
     "raml-path-match": "^2.2.2",
-    "router": "postatum/router#engine-with-master"
+    "router": "mulesoft-labs/router#router-engine"
   },
   "devDependencies": {
     "chai": "^4.1.2",
