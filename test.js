@@ -97,7 +97,7 @@ describe('Router', function () {
         }
 
         return makeFetcher(router).fetch('/', {
-          method: method
+          method
         })
           .then(function (res) {
             expect(res.status).to.equal(200)
@@ -153,7 +153,7 @@ describe('Router', function () {
         router[method]('/foo', helloWorld)
 
         return makeFetcher(router).fetch('/foo', {
-          method: method
+          method
         })
           .then(function (res) {
             expect(res.status).to.equal(200)
@@ -169,7 +169,7 @@ describe('Router', function () {
         router[method]('/foo', [helloWorld])
 
         return makeFetcher(router).fetch('/foo', {
-          method: method
+          method
         })
           .then(function (res) {
             expect(res.status).to.equal(200)
@@ -200,7 +200,7 @@ describe('Router', function () {
         })
 
         return makeFetcher(router).fetch('/123', {
-          method: method
+          method
         })
           .then(function (res) {
             expect(res.status).to.equal(200)
