@@ -30,7 +30,7 @@
   },
   "homepage": "https://github.com/mulesoft-labs/osprey-router",
   "dependencies": {
-    "array-flatten": "^2.0.0",
+    "array-flatten": "^3.0.0",
     "methods": "^1.1.1",
     "raml-path-match": "^2.2.2",
     "router": "blakeembrey/router#router-engine",
@@ -42,8 +42,8 @@
     "finalhandler": "^1.1.1",
     "mocha": "^7.1.2",
     "nyc": "^15.0.1",
-    "popsicle": "12.0.4",
-    "popsicle-server": "^2.0.0",
+    "popsicle": "^12.0.5",
+    "popsicle-server": "^3.0.0",
     "standard": "^14.3.3",
     "throwback": "^4.1.0"
   }

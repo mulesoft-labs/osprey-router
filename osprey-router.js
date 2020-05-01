@@ -1,6 +1,6 @@
 var Engine = require('router/engine')
 var methods = require('methods')
-var flatten = require('array-flatten')
+var flatten = require('array-flatten').flatten
 var ramlPath = require('raml-path-match')
 var extend = require('xtend')
 var slice = Array.prototype.slice
