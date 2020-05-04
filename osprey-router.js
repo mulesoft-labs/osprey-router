@@ -1,7 +1,7 @@
+const ramlPathMatch = require('raml-path-match')
 const Engine = require('router/engine')
 const methods = require('methods')
 const flatten = require('array-flatten').flatten
-const ramlPathMatch = require('raml-path-match')
 const slice = Array.prototype.slice
 
 /**

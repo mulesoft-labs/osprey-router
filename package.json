@@ -39,12 +39,12 @@
     "chai": "^4.1.2",
     "es6-promise": "^4.2.8",
     "finalhandler": "^1.1.2",
-    "mocha": "^7.1.0",
     "nyc": "^15.0.0",
     "popsicle": "^12.0.5",
     "popsicle-server": "^3.0.0",
-    "standard": "^14.3.1",
-    "throwback": "^4.1.0",
-    "webapi-parser": "^0.4.1"
+    "webapi-parser": "^0.4.1",
+    "mocha": "^7.1.2",
+    "standard": "^14.3.3",
+    "throwback": "^4.1.0"
   }
 }
