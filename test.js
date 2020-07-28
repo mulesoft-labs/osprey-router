@@ -1,21 +1,22 @@
-/* global describe, it */
+/* global describe, it, before */
 
 require('es6-promise').polyfill()
 
-var methods = require('methods')
-var expect = require('chai').expect
-var Router = require('./')
+const methods = require('methods')
+const expect = require('chai').expect
+const Router = require('./')
+const wp = require('webapi-parser')
 
 /* Helps using popsicle-server with popsicle version 12+.
  *
  * Inspired by popsicle 12.0+ code.
  */
 function makeFetcher (app) {
-  var compose = require('throwback').compose
-  var Request = require('servie').Request
-  var popsicle = require('popsicle')
-  var popsicleServer = require('popsicle-server').server
-  var finalhandler = require('finalhandler')
+  const compose = require('throwback').compose
+  const Request = require('servie').Request
+  const popsicle = require('popsicle')
+  const popsicleServer = require('popsicle-server').server
+  const finalhandler = require('finalhandler')
 
   // Set response text to "body" property to mimic popsicle v10
   // response interface.
@@ -35,8 +36,8 @@ function makeFetcher (app) {
     }
   }
 
-  var popsicleServerMiddleware = popsicleServer(createServer(app))
-  var middleware = compose([
+  const popsicleServerMiddleware = popsicleServer(createServer(app))
+  const middleware = compose([
     responseBodyMiddleware,
     popsicleServerMiddleware,
     popsicle.middleware
@@ -46,6 +47,11 @@ function makeFetcher (app) {
     fetch: popsicle.toFetch(middleware, Request)
   }
 }
+
+before(async function () {
+  this.timeout(5000)
+  await wp.WebApiParser.init()
+})
 
 describe('Router', function () {
   it('should be a function', function () {
@@ -57,16 +63,25 @@ describe('Router', function () {
   })
 
   it('should reject missing callback', function () {
-    var router = new Router()
+    const router = new Router()
 
     expect(Function.prototype.bind.call(router, router, {}, {}))
       .to.throw(/argument callback is required/)
   })
 
   it('should not crash with invalid decode', function () {
-    var router = new Router()
+    const router = new Router()
+    const params = [
+      new wp.model.domain.Parameter()
+        .withName('id')
+        .withRequired(true)
+        .withSchema(
+          new wp.model.domain.ScalarShape()
+            .withName('schema')
+            .withDataType('http://www.w3.org/2001/XMLSchema#string'))
+    ]
 
-    router.get('/{id}', { id: { type: 'string' } }, function (req, res, next) {
+    router.get('/{id}', params, function (req, res, next) {
       return next()
     }, helloWorld)
 
@@ -78,15 +93,36 @@ describe('Router', function () {
       })
   })
 
+  it('should accept webapi-parser.Parameter[] as uri parameters', async function () {
+    const params = [
+      new wp.model.domain.Parameter()
+        .withName('id')
+        .withRequired(true)
+        .withSchema(
+          new wp.model.domain.ScalarShape()
+            .withName('schema')
+            .withDataType('http://www.w3.org/2001/XMLSchema#integer')),
+      new wp.model.domain.Parameter()
+        .withName('name')
+        .withRequired(false)
+        .withSchema(
+          new wp.model.domain.ScalarShape()
+            .withName('schema')
+            .withDataType('http://www.w3.org/2001/XMLSchema#string'))
+    ]
+    const router = new Router({ ramlUriParameters: params })
+    expect(router.ramlUriParameters).to.deep.equal(params)
+  })
+
   describe('Router#all(path, fn)', function () {
     it('should be chainable', function () {
-      var router = new Router()
+      const router = new Router()
 
       expect(router.all('/', helloWorld)).to.equal(router)
     })
 
     it('should respond to all methods', function () {
-      var router = new Router()
+      const router = new Router()
 
       router.all('/', helloWorld)
 
@@ -109,7 +145,7 @@ describe('Router', function () {
     })
 
     it('should accept arrays', function () {
-      var router = new Router()
+      const router = new Router()
 
       router.all('/', [helloWorld])
 
@@ -123,9 +159,9 @@ describe('Router', function () {
     })
 
     it('should not stack overflow with many registered routes', function () {
-      var router = new Router()
+      const router = new Router()
 
-      for (var i = 0; i < 6000; i++) {
+      for (let i = 0; i < 6000; i++) {
         router.get('/thing' + i, helloWorld)
       }
 
@@ -148,7 +184,7 @@ describe('Router', function () {
       }
 
       it('Router#' + method, function () {
-        var router = new Router()
+        const router = new Router()
 
         router[method]('/foo', helloWorld)
 
@@ -164,7 +200,7 @@ describe('Router', function () {
       })
 
       it('Router#' + method + ' should accept an array', function () {
-        var router = new Router()
+        const router = new Router()
 
         router[method]('/foo', [helloWorld])
 
@@ -187,14 +223,19 @@ describe('Router', function () {
         return
       }
 
-      it('Router#' + method, function () {
-        var router = new Router()
+      it('Router#' + method + ' webapi-parser.Parameter[]', function () {
+        const router = new Router()
+        const params = [
+          new wp.model.domain.Parameter()
+            .withName('id')
+            .withRequired(true)
+            .withSchema(
+              new wp.model.domain.ScalarShape()
+                .withName('schema')
+                .withDataType('http://a.ml/vocabularies/shapes#number'))
+        ]
 
-        router[method]('/{id}', {
-          id: {
-            type: 'number'
-          }
-        }, function (req, res) {
+        router[method]('/{id}', params, function (req, res) {
           res.setHeader('x-typeof', typeof req.params.id)
           res.end()
         })
@@ -212,7 +253,7 @@ describe('Router', function () {
 
   describe('Router#use(path, fn)', function () {
     it('should be able to use a middleware function', function () {
-      var router = new Router()
+      const router = new Router()
 
       router.use(function (req, res) {
         res.setHeader('x-url', req.url)
@@ -229,7 +270,7 @@ describe('Router', function () {
     })
 
     it('should accept arrays', function () {
-      var router = new Router()
+      const router = new Router()
 
       router.use([function (req, res) {
         res.setHeader('x-url', req.url)
@@ -246,7 +287,7 @@ describe('Router', function () {
     })
 
     it('should accept a path', function () {
-      var router = new Router()
+      const router = new Router()
 
       router.use('/foo', function (req, res) {
         res.setHeader('x-url', req.url)
@@ -262,18 +303,24 @@ describe('Router', function () {
         })
     })
 
-    it('should accept a path and schema', function () {
-      var router = new Router()
+    it('should accept a path and webapi-parser.Parameter[]', function () {
+      const router = new Router()
+      const params = [
+        new wp.model.domain.Parameter()
+          .withName('path')
+          .withRequired(true)
+          .withSchema(
+            new wp.model.domain.ScalarShape()
+              .withName('schema')
+              .withDataType('http://www.w3.org/2001/XMLSchema#string')
+              .withValues([
+                new wp.model.domain.ScalarNode('foo', 'string'),
+                new wp.model.domain.ScalarNode('bar', 'string')
+              ])
+          )
+      ]
 
-      router.use('/{path}', {
-        path: {
-          type: 'string',
-          enum: [
-            'foo',
-            'bar'
-          ]
-        }
-      }, function (req, res) {
+      router.use('/{path}', params, function (req, res) {
         res.setHeader('x-url', req.url)
         res.end()
       })
@@ -289,13 +336,18 @@ describe('Router', function () {
   })
 
   it('should allow re-use of uri parameters', function () {
-    var router = new Router()
+    const router = new Router()
+    const params = [
+      new wp.model.domain.Parameter()
+        .withName('id')
+        .withRequired(true)
+        .withSchema(
+          new wp.model.domain.ScalarShape()
+            .withName('schema')
+            .withDataType('http://a.ml/vocabularies/shapes#number'))
+    ]
 
-    router.use('/{id}', {
-      id: {
-        type: 'number'
-      }
-    }, function (req, res, next) {
+    router.use('/{id}', params, function (req, res, next) {
       next()
     })
 

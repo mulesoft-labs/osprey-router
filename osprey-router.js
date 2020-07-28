@@ -1,9 +1,8 @@
-var Engine = require('router/engine')
-var methods = require('methods')
-var flatten = require('array-flatten').flatten
-var ramlPath = require('raml-path-match')
-var extend = require('xtend')
-var slice = Array.prototype.slice
+const ramlPathMatch = require('raml-path-match')
+const Engine = require('router/engine')
+const methods = require('methods')
+const flatten = require('array-flatten').flatten
+const slice = Array.prototype.slice
 
 /**
  * Expose `router`.
@@ -21,14 +20,19 @@ function router (options) {
 }
 
 /**
- * Construct a router instance.
+ * Constructs a router instance.
+ *
+ * @param {Object} options Following options are supported:
+ *    ramlUriParameters. Array.<webapi-parser.Parameter>
+ * @return {Engine}
  */
 function Router (options) {
-  var router = Engine.call(this, options)
+  const router = Engine.call(this, options)
 
   // Construct with default URI parameters.
-  router.ramlUriParameters = options ? options.ramlUriParameters : {}
-  router.RAMLVersion = options ? options.RAMLVersion : undefined
+  router.ramlUriParameters = options
+    ? options.ramlUriParameters
+    : []
 
   return router
 }
@@ -39,63 +43,75 @@ function Router (options) {
 Router.prototype = Object.create(Engine.prototype)
 
 /**
- * Create a `raml-path-match` compatible `.use`.
+ * Creates a `raml-path-match` compatible `.use`.
+ *
+ * When uri parameters schema is passed as a second parameter,
+ * it must be an array of `webapi-parser.Parameter`.
  */
 Router.prototype.use = function use () {
-  var offset = 0
-  var path = '/'
-  var schema
+  let offset = 0
+  let path = '/'
+  let uriParams
 
   if (!isMiddleware(arguments[0])) {
     path = arguments[0]
     offset = 1
 
     if (!isMiddleware(arguments[1])) {
-      schema = arguments[1]
+      uriParams = arguments[1]
       offset = 2
     }
   }
 
-  var callbacks = flatten(slice.call(arguments, offset))
-  var params = extend(this.ramlUriParameters, schema)
+  const callbacks = flatten(slice.call(arguments, offset))
 
-  var match = ramlPath(path, params, {
+  uriParams = extendParams(this.ramlUriParameters, uriParams)
+
+  const match = ramlPathMatch(path, uriParams, {
     sensitive: this.caseSensitive,
     strict: this.strict,
-    end: false,
-    RAMLVersion: this.RAMLVersion
+    end: false
   })
 
-  this.ramlUriParameters = params
+  this.ramlUriParameters = uriParams
 
   return Engine.prototype.use.call(this, path, match, callbacks)
 }
 
 /**
- * Create a `raml-path-match` compatible route.
+ * Creates a `raml-path-match` compatible route.
+ *
+ * @param  {String}                          path
+ * @param  {Array.<webapi-parser.Parameter>} uriParams
  */
-Router.prototype.route = function route (path, schema) {
-  var params = extend(this.ramlUriParameters, schema)
+Router.prototype.route = function route (path, uriParams) {
+  uriParams = extendParams(this.ramlUriParameters, uriParams)
 
-  var match = ramlPath(path, params, {
+  const match = ramlPathMatch(path, uriParams, {
     sensitive: this.caseSensitive,
     strict: this.strict,
-    end: true,
-    RAMLVersion: this.RAMLVersion
+    end: true
   })
 
-  this.ramlUriParameters = params
+  this.ramlUriParameters = uriParams
 
   return Engine.prototype.route.call(this, path, match)
 }
 
-// create Router#VERB functions
-methods.concat('all').forEach(function (method) {
-  Router.prototype[method] = function (path, schema) {
-    var hasSchema = !isMiddleware(schema)
-    var route = this.route(path, hasSchema ? schema : null)
+//
+/**
+ * Create Router#VERB functions.
+ *
+ * Callbacks' params are as follows:
+ * @param  {String}                         path
+ * @param  {Array.<webapi-parser.Parameter>} uriParams
+ */
+methods.concat('all').forEach(function (methodName) {
+  Router.prototype[methodName] = function (path, uriParams) {
+    const hasUriParams = !isMiddleware(uriParams)
+    const route = this.route(path, hasUriParams ? uriParams : null)
 
-    route[method].apply(route, slice.call(arguments, hasSchema ? 2 : 1))
+    route[methodName].apply(route, slice.call(arguments, hasUriParams ? 2 : 1))
 
     return this
   }
@@ -108,5 +124,30 @@ methods.concat('all').forEach(function (method) {
  * @return {Boolean}
  */
 function isMiddleware (value) {
-  return typeof value === 'function' || Array.isArray(value)
+  const isFunction = typeof value === 'function'
+  const firstElementIsFunction = (
+    Array.isArray(value) && typeof value[0] === 'function')
+  return isFunction || firstElementIsFunction
+}
+
+/**
+ * Extends target list of Parameters with a source one.
+ * Parameters from source override parameters from target with
+ * the same IDs.
+ *
+ * @param  {Array.<webapi-parser.Parameter>} target
+ * @param  {Array.<webapi-parser.Parameter>} source
+ * @return {Boolean}
+ */
+function extendParams (target, source) {
+  target = target || []
+  source = source || []
+  const params = [...source]
+  const sourceIds = source.map(p => p.id)
+  target.forEach(param => {
+    if (!sourceIds.includes(param.id)) {
+      params.push(param)
+    }
+  })
+  return params
 }
